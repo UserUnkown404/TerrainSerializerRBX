@@ -1,0 +1,24 @@
+local Module = {}
+
+function Module:RequestWriteFile(FileName, Extension, FileStringData)
+    local FileTable = listfiles()
+    local Number = 1
+    local FileNameExtension = ""
+
+    local NewFileName = FileName
+
+    local function CheckExistingFile()
+        if table.find(FileTable, NewFileName.."."..Extension) or table.find(FileTable, NewFileName) then
+            Number = Number+1
+            FileNameExtension = " ("..tostring(Number)..")"
+            NewFileName = FileName..FileNameExtension.."."..Extension
+            CheckExistingFile()
+        else
+            print(NewFileName)
+            writefile(NewFileName, FileStringData)
+        end
+    end
+    CheckExistingFile()
+end
+
+return Module
