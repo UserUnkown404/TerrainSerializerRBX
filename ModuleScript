@@ -1,0 +1,73 @@
+--by Tom_atoes
+--https://devforum.roblox.com/t/convert-terrain-voxel-data-into-a-string-for-easy-copy-paste/894650
+
+local module = {}
+
+local dataTypeConvert = {
+	
+	["Vector3"] = function(data)
+		
+		return string.format("Vector3.new(%0s, %1s, %2s)", tostring(data.X), tostring(data.Y), tostring(data.Z))
+		
+	end;
+	
+	["EnumItem"] = function(data)
+		return data.Name
+	end;
+	
+	["number"] = function(data)
+		return tostring(data)
+	end;
+}
+
+function convertTable(data)
+
+	local tVal = "{\n"
+
+	for i, v in ipairs(data) do
+		
+		local dataType = typeof(v)
+		
+		if dataType == "table" then
+			tVal = tVal .. convertTable(v) .. ", " -- boom done
+		elseif dataTypeConvert[dataType] then
+			tVal = tVal .. dataTypeConvert[dataType](v) .. ", " -- boom done
+		end
+
+	end
+
+	tVal = tVal .. "\n}"
+
+	return tVal
+	
+end
+
+module.convert = function(t)
+	
+	local stringT = ""
+	
+	for i, v in ipairs(Enum.Material:GetEnumItems()) do
+		stringT = stringT .. string.format("local %s = %s\n", v.Name, tostring(v))
+	end
+	
+	stringT = stringT .. "\nreturn {\n"
+	
+	for i, v in pairs(t) do
+			
+		local dataType = typeof(v)
+		
+		if dataType == "table" then
+			stringT = stringT .. convertTable(v) .. ";\n"
+		elseif dataTypeConvert[dataType] then
+			stringT = stringT .. dataTypeConvert[dataType](v) .. ";\n" -- boom done
+		end
+		
+	end
+	
+	stringT = stringT .. "\n}"
+	
+	return stringT
+	
+end
+
+return module
